@@ -32,7 +32,7 @@ export class TOC extends HTMLElement {
     this.currentHeading = null;
   }
 
-  connectedCallback() {
+  connectedCallback(): void {
     const forAttr = this.getAttribute('for');
     let contentElement, forElement;
     if (forAttr && (forElement = document.getElementById(forAttr))) {
