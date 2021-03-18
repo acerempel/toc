@@ -21,14 +21,17 @@ interface HeadingInfo {
   preceding: HeadingInfo | null;
   link: HTMLAnchorElement;
   target: Element;
+  order: number;
 }
 
 export class TOC extends HTMLElement {
   private knownHeadings: Map<Element,HeadingInfo>;
+  private visibleHeadings: Map<Element,HeadingInfo>;
   private currentHeading: HeadingInfo | null;
   constructor() {
     super();
     this.knownHeadings = new Map();
+    this.visibleHeadings = new Map();
     this.currentHeading = null;
   }
 
@@ -43,8 +46,8 @@ export class TOC extends HTMLElement {
       return;
     }
     const headings: NodeListOf<Element> = contentElement.querySelectorAll('h2');
-    let preceding = null;
-    for (const heading of headings) {
+    let preceding: HeadingInfo | null = null;
+    headings.forEach((heading, order) => {
       let id: string | null;
       if (heading.id) {
         id = heading.id;
@@ -59,38 +62,41 @@ export class TOC extends HTMLElement {
         link.href = '#' + id;
         link.innerHTML = heading.innerHTML;
         this.appendChild(link);
-        const knownHeading: HeadingInfo = { target: heading, link, preceding };
+        const knownHeading: HeadingInfo = { target: heading, link, preceding, order };
         this.knownHeadings.set(heading, knownHeading);
         preceding = knownHeading;
       }
-    }
+    })
     if ('IntersectionObserver' in window) {
       const headingObserverCallback = (entries: Array<IntersectionObserverEntry>) => {
-        let incumbentEntry: IntersectionObserverEntry | null = null;
-        /* relevantEntry is, if at least one entry is intersecting, the
-           intersecting entry closest to the top of the viewport, otherwise the
-           entry closest to the top of the viewport. */
-        let lookingForIncumbent = true;
-        const reducer = (acc : IntersectionObserverEntry | null, next: IntersectionObserverEntry) => {
-          if (lookingForIncumbent && next.target === this.currentHeading?.target) {
-            incumbentEntry = next;
-            lookingForIncumbent = false;
-          }
-          if (next.isIntersecting && !acc?.isIntersecting) {
-            return next;
-          } else if (next.isIntersecting /* && acc && acc.isIntersecting */) {
-            return next.boundingClientRect.top < acc!.boundingClientRect.top ? next : acc;
-          } else /* if (!next.isIntersecting) */ {
-            return acc;
+        let currentHeadingWhichDisappeared = null;
+        for (const entry of entries) {
+          let headingInfo;
+          if (entry.isIntersecting && (headingInfo = this.knownHeadings.get(entry.target))) {
+            this.visibleHeadings.set(entry.target, headingInfo)
+          } else {
+            this.visibleHeadings.delete(entry.target)
+            if (entry.target === this.currentHeading?.target) {
+              currentHeadingWhichDisappeared = entry;
+            }
           }
         }
-        const relevantEntry = entries.reduce(reducer, null);
-        if (relevantEntry?.isIntersecting) {
-          this.setCurrentHeading(relevantEntry);
-        } else if (incumbentEntry && (incumbentEntry as IntersectionObserverEntry).boundingClientRect.top > 0) {
-          // not intersecting, but positive: below the viewport
-          this.setCurrentHeading(this.currentHeading?.preceding ?? null);
-        } // otherwise, current heading does not change.
+        let relevantHeading = null;
+        let previousHeading = null;
+        for (const [target, info] of this.visibleHeadings) {
+          if (!previousHeading || info.order < previousHeading.order) {
+            relevantHeading = target;
+          }
+          previousHeading = info;
+        }
+        if (!relevantHeading && currentHeadingWhichDisappeared) {
+          relevantHeading =
+            currentHeadingWhichDisappeared.boundingClientRect.top < 0
+              ? currentHeadingWhichDisappeared.target
+              : this.knownHeadings.get(currentHeadingWhichDisappeared.target)?.preceding?.target
+        }
+        if (relevantHeading) { this.setCurrentHeading(relevantHeading) }
+        else { console.log("No relevant heading") }
       }
       const headingObserverOptions = {
         threshold: 1.0,
@@ -103,9 +109,9 @@ export class TOC extends HTMLElement {
     }
   }
 
-  setCurrentHeading(newHeadingEntry: { target: Element } | null): void {
+  setCurrentHeading(newHeadingEntry: Element | null): void {
     if (this.currentHeading) removeAriaCurrent(this.currentHeading.link);
-    const newCurrentHeading = newHeadingEntry && (this.knownHeadings.get(newHeadingEntry.target) ?? null);
+    const newCurrentHeading = newHeadingEntry && (this.knownHeadings.get(newHeadingEntry) ?? null);
     if (newCurrentHeading) { setAriaCurrent(newCurrentHeading.link) }
     this.currentHeading = newCurrentHeading;
   }
