@@ -1,7 +1,20 @@
 This package provides a custom element `<table-of-contents>` that
-populates itself with a list of links to the headings in another element.
+populates itself with a list of links to the headings in another element,
+and applies the [`aria-current`][aria-current] attribute to the heading
+representing the section that is currently visible within the viewport.
+It uses the [IntersectionObserver API][IntersectionObserver] to
+accomplish this.
 
-Its interface is not yet stable. I created it for my own use, and,
+[aria-current]: https://www.w3.org/TR/wai-aria-1.1/#aria-current
+  "aria-current attribute - WAI-ARIA 1.1"
+
+[IntersectionObserver]: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+  "IntersectionObserver API | Mozilla Developer Network"
+
+
+This project is in a state of flux. It works as described, but I may change
+the interface at any time and there are many edge cases I have not
+tested. I created this project for my own use; 
 unless it becomes useful for others, I
 cannot say how long I will keep it maintained.
 
