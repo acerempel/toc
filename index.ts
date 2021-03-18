@@ -45,20 +45,24 @@ export class TOC extends HTMLElement {
     const headings: NodeListOf<Element> = contentElement.querySelectorAll('h2');
     let preceding = null;
     for (const heading of headings) {
-      let id: string;
-      if (!heading.id) {
-        id = slugify(heading.textContent!);
+      let id: string | null;
+      if (heading.id) {
+        id = heading.id;
+      } else if (!heading.id && heading.textContent) {
+        id = slugify(heading.textContent);
         heading.id = id;
       } else {
-        id = heading.id;
+        id = null;
       }
-      const link = document.createElement('a');
-      link.href = '#' + id;
-      link.innerHTML = heading.innerHTML;
-      this.appendChild(link);
-      const knownHeading: HeadingInfo = { target: heading, link, preceding };
-      this.knownHeadings.set(heading, knownHeading);
-      preceding = knownHeading;
+      if (id) {
+        const link = document.createElement('a');
+        link.href = '#' + id;
+        link.innerHTML = heading.innerHTML;
+        this.appendChild(link);
+        const knownHeading: HeadingInfo = { target: heading, link, preceding };
+        this.knownHeadings.set(heading, knownHeading);
+        preceding = knownHeading;
+      }
     }
     if ('IntersectionObserver' in window) {
       const headingObserverCallback = (entries: Array<IntersectionObserverEntry>) => {
