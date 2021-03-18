@@ -43,7 +43,7 @@ export class TOC extends HTMLElement {
     } else if (this.parentElement) {
       contentElement = this.parentElement;
     } else {
-      return;
+      contentElement = document.body;
     }
     const headings: NodeListOf<Element> = contentElement.querySelectorAll('h2');
     let preceding: HeadingInfo | null = null;
