@@ -40,10 +40,11 @@ export class TOC extends HTMLElement {
     let contentElement, forElement;
     if (forAttr && (forElement = document.getElementById(forAttr))) {
       contentElement = forElement;
-    } else if (this.parentElement) {
-      contentElement = this.parentElement;
     } else {
-      contentElement = document.body;
+      // The `?? document.body` is just to please the TypeScript compiler. We
+      // definitely have at least the <body> element as an ancestor, since we
+      // are inside connectedCallback(), thus in the DOM tree.
+      contentElement = this.closest("article, aside, section, blockquote, body") ?? document.body;
     }
     const headings: NodeListOf<Element> = contentElement.querySelectorAll('h2');
     let preceding: HeadingInfo | null = null;
