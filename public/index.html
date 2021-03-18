@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>TOC test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script defer src="/index.js"></script>
+  <style>
+    body {
+      font-family: "Hoefler Text";
+      line-height: 1.5;
+      margin: 1rem;
+    }
+    p {
+      margin-bottom: 1.5rem;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 20ch 50ch 20ch;
+      grid-column-gap: 5ch;
+      justify-content: center;
+    }
+    .content {
+      grid-column: 2 / 3;
+    }
+    .toc {
+      grid-column: 1 / 2;
+      position: fixed;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body class=container>
+  <main class=content>
+    <h1>The Life and Opinions of Tristram Shandy, Gentleman</h1>
+    <div id=content></div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    fetch("/tristram-shandy.txt")
+      .then(response => response.text())
+      .then(markdown => {
+        const element = document.getElementById('content');
+        element.innerHTML = marked(markdown);
+      }).then(() => {
+        const toc = document.createElement('table-of-contents');
+        toc.setAttribute('for', 'content');
+        document.querySelector('.toc').appendChild(toc);
+      });
+  </script>
+  <header class=toc>
+  </header>
+</body>
+
+</html>

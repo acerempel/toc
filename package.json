@@ -1,0 +1,20 @@
+{
+  "name": "toc",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "ESBUILD_WATCH=true node ./build.js"
+  },
+  "devDependencies": {
+    "@rushstack/eslint-patch": "^1.0.6",
+    "@typescript-eslint/eslint-plugin": "^4.18.0",
+    "@typescript-eslint/parser": "^4.18.0",
+    "@yarnpkg/esbuild-plugin-pnp": "^0.0.1",
+    "esbuild": "^0.9.3",
+    "eslint": "^7.22.0",
+    "sirv-cli": "^1.0.11",
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "slug": "^4.0.3"
+  }
+}
