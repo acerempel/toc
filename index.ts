@@ -1,13 +1,5 @@
 import slugify from 'slug';
 
-const tocTemplate = document.createElement('template');
-tocTemplate.innerHTML = `
-<style>:host { display: block } a[aria-current = "true"] { font-weight: 500; }</style>
-<nav class="flex column link-plain">
-  <slot name="title"></slot>
-</nav>
-`;
-
 const hasAriaCurrent = 'ariaCurrent' in document.createElement('a');
 
 // TypeScript doesn't know about the ariaCurrent property yet
@@ -36,8 +28,6 @@ export class TOC extends HTMLElement {
   private currentHeading: HeadingInfo | null;
   constructor() {
     super();
-    let shadowRoot = this.attachShadow({mode: 'open'});
-    shadowRoot.appendChild(tocTemplate.content);
     this.knownHeadings = new Map();
     this.currentHeading = null;
   }
@@ -53,7 +43,6 @@ export class TOC extends HTMLElement {
       return;
     }
     let headings: NodeListOf<Element> = contentElement.querySelectorAll('h2');
-    let nav = this.shadowRoot!.lastElementChild!;
     let preceding = null;
     for (let heading of headings) {
       let id: string;
@@ -65,9 +54,8 @@ export class TOC extends HTMLElement {
       }
       let link = document.createElement('a');
       link.href = '#' + id;
-      link.className = 'mt-1/8 light';
       link.innerHTML = heading.innerHTML;
-      nav.appendChild(link);
+      this.appendChild(link);
       let knownHeading: HeadingInfo = { target: heading, link, preceding };
       this.knownHeadings.set(heading, knownHeading);
       preceding = knownHeading;
