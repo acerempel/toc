@@ -62,7 +62,8 @@ export class TOC extends HTMLElement {
       contentElement = this.closest("article, aside, section, blockquote, body") ?? document.body;
     }
 
-    const headings: NodeListOf<Element> = contentElement.querySelectorAll('h2');
+    const selectors = this.getAttribute('selectors') ?? 'h2';
+    const headings: NodeListOf<Element> = contentElement.querySelectorAll(selectors);
     let preceding: HeadingInfo | null = null;
     headings.forEach((heading, order) => {
       let id: string | null;

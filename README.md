@@ -117,3 +117,7 @@ include a link to its own heading (`<h2>Contents</h2>`).
 
 Any headings that do not have `id`s to link to will be given an `id`
 attribute that is a slugification of their text content.
+
+If a `selectors` attribute is provided, its value will be used as the
+selector list to query for when getting the headings to show in the
+table. If it is not provided, the selector string `'h2'` is used.
