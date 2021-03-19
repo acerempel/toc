@@ -154,4 +154,6 @@ export class TOC extends HTMLElement {
 
 }
 
-customElements.define('table-of-contents', TOC);
+if ('customElements' in window) {
+  customElements.define('table-of-contents', TOC);
+}
